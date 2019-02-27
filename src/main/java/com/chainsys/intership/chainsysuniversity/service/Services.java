@@ -1,6 +1,5 @@
 package com.chainsys.intership.chainsysuniversity.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.chainsys.intership.chainsysuniversity.dao.CourseDAO;
 import com.chainsys.intership.chainsysuniversity.dao.CourseEnrollmentDAO;
+import com.chainsys.intership.chainsysuniversity.dao.EmailDAO;
 import com.chainsys.intership.chainsysuniversity.model.Course;
 import com.chainsys.intership.chainsysuniversity.model.CourseEnrollment;
 
@@ -17,6 +17,9 @@ public class Services {
 	CourseDAO courseDAO;
 	@Autowired
 	CourseEnrollmentDAO courseEnrollmentDAO;
+	
+	@Autowired
+	EmailDAO emailDAO;
 
 	public String addCourse(Course course) {
 		int courseInsertResult = courseDAO.addCourse(course);
@@ -41,28 +44,27 @@ public class Services {
 		return courseEnrolledMessage;
 	}
 
-	public List<Course> displayUserCoursesById(CourseEnrollment courseEnrollment) {
+	public List<CourseEnrollment> displayUserCoursesById(CourseEnrollment courseEnrollment) {
 
-		List<Course> courseIdList = null;
+		List<CourseEnrollment> courseEnrollmentList = null;
 		String status = courseEnrollment.getStatus();		
 		if (status == null) {
 
-			courseIdList = courseEnrollmentDAO
+			courseEnrollmentList = courseEnrollmentDAO
 					.getUserCourseIdWithOutStatus(courseEnrollment);
 		} else {
 
-			courseIdList = courseEnrollmentDAO
+			courseEnrollmentList = courseEnrollmentDAO
 					.getUserCourseIdWithStatus(courseEnrollment);
 		}
 
-		List<Course> courseDetailsList = new ArrayList<Course>();
-		for (Course courseDetail : courseIdList) {
-			courseDetail = courseDAO.selectCourseDetailsById(courseDetail);
-			courseDetailsList.add(courseDetail);
-
+//		List<CourseEnrollment> courseDetailsList = new ArrayList<CourseEnrollment>();
+		for (CourseEnrollment courseEnrollmentDetail : courseEnrollmentList) {
+			Course course = courseDAO.selectCourseDetailsById(courseEnrollmentDetail.getCourse());
+			courseEnrollmentDetail.setCourse(course);
 		}
 
-		return courseDetailsList;
+		return courseEnrollmentList;
 	}
 
 	// public List<Course> displayCompletedCoursesById(User user) {
@@ -80,12 +82,14 @@ public class Services {
 	// return courseDetailsList;
 	// }
 
-	public String courseComplete(CourseEnrollment courseEnrollment) {
+	public String courseComplete(CourseEnrollment courseEnrollment)  {
 		int courseCompletedResult = courseEnrollmentDAO
 				.courseComplete(courseEnrollment);
 		String courseCompletedMessage = null;
-		if (courseCompletedResult > 0)
+		if (courseCompletedResult > 0)		{
+			
 			courseCompletedMessage = "Course Completed successfully.";
+		}
 		else
 			courseCompletedMessage = "Course Not completed";
 

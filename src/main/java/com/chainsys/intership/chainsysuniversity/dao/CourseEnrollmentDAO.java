@@ -29,66 +29,75 @@ public class CourseEnrollmentDAO {
 		return courseEnrollmentResult;
 
 	}
-	
+
 	public int courseComplete(CourseEnrollment courseEnrollment) {
 
 		String query = "UPDATE course_enrollment set end_date=?,status=? WHERE user_id=?";
-		Object[] parameters = new Object[] {
-				courseEnrollment.getEndDate(),
+		Object[] parameters = new Object[] { courseEnrollment.getEndDate(),
 				courseEnrollment.getStatus(),
-				courseEnrollment.getUser().getId()			
-				 };
+				courseEnrollment.getUser().getId() };
 		int courseCompleteResult = jdbcTemplate.update(query, parameters);
 		return courseCompleteResult;
 
 	}
 
-	public List<Course> getUserCourseIdWithStatus(CourseEnrollment courseEnrollment) {
+	public List<CourseEnrollment> getUserCourseIdWithStatus(
+			CourseEnrollment courseEnrollment) {
 
-		String query = "SELECT course_id from course_enrollment WHERE user_id=? and status=?";
-		
-		Object[] parameters = new Object[] { courseEnrollment.getUser().getId(),courseEnrollment.getStatus() };
-		List<Course> courseList = jdbcTemplate.query(query, parameters, (
-				resultSet, row) -> {
-			Course course = courseInitialization(resultSet);
-			return course;
-		});
-		return courseList;
+		String query = "SELECT course_id,status,start_date,end_date from course_enrollment WHERE user_id=? and status=?";
+
+		Object[] parameters = new Object[] {
+				courseEnrollment.getUser().getId(),
+				courseEnrollment.getStatus() };
+		List<CourseEnrollment> courseEnrollmentList = jdbcTemplate.query(query,
+				parameters, (resultSet, row) -> {
+					CourseEnrollment courseEnrollmentDetails = courseInitialization(resultSet);
+					return courseEnrollmentDetails;
+				});
+		return courseEnrollmentList;
 
 	}
-	
-	public List<Course> getUserCourseIdWithOutStatus(CourseEnrollment courseEnrollment) {
 
-		String query = "SELECT course_id from course_enrollment WHERE user_id=?";
-		
+	public List<CourseEnrollment> getUserCourseIdWithOutStatus(
+			CourseEnrollment courseEnrollment) {
+
+		String query = "SELECT course_id,status,start_date,end_date from course_enrollment WHERE user_id=?";
+
 		Object[] parameters = new Object[] { courseEnrollment.getUser().getId() };
-		List<Course> courseList = jdbcTemplate.query(query, parameters, (
-				resultSet, row) -> {
-			Course course = courseInitialization(resultSet);
-			return course;
-		});
-		return courseList;
+		List<CourseEnrollment> courseEnrollmentList = jdbcTemplate.query(query,
+				parameters, (resultSet, row) -> {
+					CourseEnrollment courseEnrollmentDetails = courseInitialization(resultSet);
+					return courseEnrollmentDetails;
+				});
+		return courseEnrollmentList;
 
 	}
-	
-//	public List<Course> getCompletedCourseId(User user) {
-//
-//		String query = "SELECT course_id from course_enrollment WHERE user_id=? and status=?";
-//		
-//		Object[] parameters = new Object[] { user.getId(),"Completed" };
-//		List<Course> courseList = jdbcTemplate.query(query, parameters, (
-//				resultSet, row) -> {
-//			Course course = courseInitialization(resultSet);
-//			return course;
-//		});
-//		return courseList;
-//
-//	}
 
-	public Course courseInitialization(ResultSet resultSet) throws SQLException {
+	// public List<Course> getCompletedCourseId(User user) {
+	//
+	// String query =
+	// "SELECT course_id from course_enrollment WHERE user_id=? and status=?";
+	//
+	// Object[] parameters = new Object[] { user.getId(),"Completed" };
+	// List<Course> courseList = jdbcTemplate.query(query, parameters, (
+	// resultSet, row) -> {
+	// Course course = courseInitialization(resultSet);
+	// return course;
+	// });
+	// return courseList;
+	//
+	// }
+
+	public CourseEnrollment courseInitialization(ResultSet resultSet)
+			throws SQLException {
 		Course course = new Course();
 		course.setId(resultSet.getInt("course_id"));
-		return course;
+		CourseEnrollment courseEnrollment = new CourseEnrollment();
+		courseEnrollment.setCourse(course);
+		courseEnrollment.setStatus(resultSet.getString("status"));
+		courseEnrollment.setStartDate(resultSet.getTimestamp("start_date").toLocalDateTime());
+		courseEnrollment.setEndDate(resultSet.getTimestamp("end_date").toLocalDateTime());
+		return courseEnrollment;
 	}
 
 }

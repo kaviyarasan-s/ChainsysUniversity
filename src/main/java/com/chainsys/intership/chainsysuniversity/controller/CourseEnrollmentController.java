@@ -3,6 +3,7 @@ package com.chainsys.intership.chainsysuniversity.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.commons.mail.EmailException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,26 +22,26 @@ public class CourseEnrollmentController {
 	Services services;
 	
 	@GetMapping("/displaycourses")
-	public List<Course> displayEnrolledCourseById(@RequestParam("userId") int userId,@RequestParam("status") String status)
+	public List<CourseEnrollment> displayEnrolledCourseById(@RequestParam("userId") int userId,@RequestParam("status") String status)
 	{
 		CourseEnrollment courseEnrollment=new CourseEnrollment();
 		User user=new User();
 		user.setId(userId);
 		courseEnrollment.setUser(user);
-		courseEnrollment.setStatus(status);
-		List<Course> courseList=services.displayUserCoursesById(courseEnrollment);
+		courseEnrollment.setStatus(status.trim().toLowerCase());
+		List<CourseEnrollment> courseList=services.displayUserCoursesById(courseEnrollment);
 		return courseList;
 	}
 	
 	@GetMapping("/displaycourseswithoutstatus")
-	public List<Course> displayEnrolledCourseById(@RequestParam("userId") int userId)
+	public List<CourseEnrollment> displayEnrolledCourseById(@RequestParam("userId") int userId)
 	{
 		CourseEnrollment courseEnrollment=new CourseEnrollment();
 		User user=new User();
 		user.setId(userId);
 		courseEnrollment.setUser(user);
 //		courseEnrollment.setStatus(null);
-		List<Course> courseList=services.displayUserCoursesById(courseEnrollment);
+		List<CourseEnrollment> courseList=services.displayUserCoursesById(courseEnrollment);
 		return courseList;
 	}
 	
@@ -58,7 +59,7 @@ public class CourseEnrollmentController {
 		LocalDateTime courseStartDate=LocalDateTime.now();
 		courseEnrollment.setStartDate(courseStartDate);
 		courseEnrollment.setEndDate(null);
-		courseEnrollment.setStatus("Enrolled");		
+		courseEnrollment.setStatus("enrolled");		
 		String message=services.courseEnrollment(courseEnrollment);
 		return message;
 	}
@@ -74,7 +75,7 @@ public class CourseEnrollmentController {
 	
 	@PostMapping("/completecourse")
 	public String courseComplete(@RequestParam("userId") int userId,
-			@RequestParam("courseId") int courseId) {
+			@RequestParam("courseId") int courseId) throws EmailException {
 
 		CourseEnrollment courseEnrollment = new CourseEnrollment();
 		Course course = new Course();
@@ -85,7 +86,7 @@ public class CourseEnrollmentController {
 		courseEnrollment.setUser(user);
 		LocalDateTime courseEndDate=LocalDateTime.now();		
 		courseEnrollment.setEndDate(courseEndDate);
-		courseEnrollment.setStatus("Completed");		
+		courseEnrollment.setStatus("completed");		
 		String message=services.courseComplete(courseEnrollment);
 		return message;
 	}

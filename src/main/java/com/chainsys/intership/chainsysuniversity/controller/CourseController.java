@@ -28,8 +28,8 @@ public class CourseController {
 			@RequestParam("courseName") String courseName) {
 
 		Course course=new Course();
-		course.setCode(courseCode);
-		course.setName(courseName);
+		course.setCode(courseCode.trim());
+		course.setName(courseName.trim());
 		String message=services.addCourse(course);
 		return message;
 	}
